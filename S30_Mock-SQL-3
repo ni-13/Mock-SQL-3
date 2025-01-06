@@ -1,0 +1,31 @@
+# Market Analysis II_Solution
+
+WITH cte AS(
+SELECT *, RANK() OVER(PARTITION BY seller_id ORDER BY order_date) AS rnk
+FROM orders 
+),
+
+cte2 AS (
+SELECT seller_id, i.item_id, rnk, i.item_brand
+
+----------------------------------------------------------------------------------
+
+# Tournament Winners_Solution
+
+WITH cte AS
+(SELECT p.player_id,p.group_id,
+SUM(CASE WHEN p.player_id= m.first_player THEN m.first_score
+WHEN p.player_id = m.second_player THEN m.second_score
+ELSE NULL 
+end) AS total_score
+FROM players p
+LEFT JOIN matches m ON p.player_id= m.first_player OR p.player_id = m.second_player
+GROUP BY p.player_id, p.group_id),
+
+cte2 AS
+(SELECT *, Dense_Rank() OVER(PARTITION BY group_id ORDER BY total_score DESC, player_id) AS rnk
+FROM cte)
+
+SELECT group_id, player_id
+FROM cte2
+WHERE rnk=1;
